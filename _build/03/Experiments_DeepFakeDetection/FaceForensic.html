@@ -13,7 +13,7 @@ prev_page:
 next_page:
   url: 
 suffix: .ipynb
-search: features create faceforensics notebook pre computed ones folder sure spectrum show results scratch feature want download preprodeepfake link bit ly wkpzyv save together otherwise just jump section loading load either created label distribution balanced dataset check havw classification classify using
+search: features create spectrum faceforensics notebook pre computed ones folder sure r check show results scratch feature want download preprodeepfake link bit ly wkpzyv save together otherwise just jump section loading load either created label distribution balanced dataset plot train pkl havw python sos classification classify using
 
 comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /content***"
 ---
@@ -57,8 +57,7 @@ comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /con
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>If you want to create the features, first of all download the "prepro_deepFake" folder from <a href="https://bit.ly/2wkPZYv">link</a>. Be sure to save the folder together with this notebook.</p>
-<p>Otherwise, just jump to section 2.</p>
-
+<h3 id="Otherwise,-just-jump-to-section-2.">Otherwise, just jump to section 2.<a class="anchor-link" href="#Otherwise,-just-jump-to-section-2."> </a></h3>
 </div>
 </div>
 </div>
@@ -71,144 +70,138 @@ comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /con
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">cv2</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">radialProfile</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">griddata</span>
-
-<span class="n">data</span><span class="o">=</span> <span class="p">{}</span>
-<span class="n">epsilon</span> <span class="o">=</span> <span class="mf">1e-8</span>
-<span class="n">N</span> <span class="o">=</span> <span class="mi">300</span>
-<span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">error</span> <span class="o">=</span> <span class="p">[]</span>
-
-
-<span class="n">number_iter</span> <span class="o">=</span> <span class="mi">1600</span>
-
-<span class="n">psd1D_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">number_iter</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span>
-<span class="n">label_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">number_iter</span><span class="p">])</span>
-<span class="n">psd1D_org_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="n">psd1D_org_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-
-
-<span class="n">cont</span> <span class="o">=</span> <span class="mi">0</span>
-
-<span class="c1">#fake data</span>
-<span class="n">rootdir</span> <span class="o">=</span> <span class="s1">&#39;prepro_deepFake/fake/&#39;</span>
-
-<span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">rootdir</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>        
-
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-        
-        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        
-        <span class="c1"># we crop the center</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">h</span><span class="p">:</span><span class="o">-</span><span class="n">h</span><span class="p">,</span><span class="n">w</span><span class="p">:</span><span class="o">-</span><span class="n">w</span><span class="p">]</span>
-
-        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-        <span class="n">fshift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-        <span class="n">magnitude_spectrum</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fshift</span><span class="p">))</span>
-        <span class="n">psd1D</span> <span class="o">=</span> <span class="n">radialProfile</span><span class="o">.</span><span class="n">azimuthalAverage</span><span class="p">(</span><span class="n">magnitude_spectrum</span><span class="p">)</span>
-
-        <span class="c1"># Calculate the azimuthally averaged 1D power spectrum</span>
-        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">psd1D</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="c1"># coordinates of a</span>
-        <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">N</span><span class="p">)</span> <span class="c1"># coordinates for interpolation</span>
-
-        <span class="n">interpolated</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">(</span><span class="n">points</span><span class="p">,</span><span class="n">psd1D</span><span class="p">,</span><span class="n">xi</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
-        <span class="n">interpolated</span> <span class="o">/=</span> <span class="n">interpolated</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="n">psd1D_total</span><span class="p">[</span><span class="n">cont</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">interpolated</span>             
-        <span class="n">label_total</span><span class="p">[</span><span class="n">cont</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">cont</span><span class="o">+=</span><span class="mi">1</span>
-
-        <span class="k">if</span> <span class="n">cont</span> <span class="o">==</span> <span class="n">number_iter</span><span class="p">:</span>
-            <span class="k">break</span>
-    <span class="k">if</span> <span class="n">cont</span> <span class="o">==</span> <span class="n">number_iter</span><span class="p">:</span>
-        <span class="k">break</span>
-            
-<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-    <span class="n">psd1D_org_mean</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">psd1D_total</span><span class="p">[:,</span><span class="n">x</span><span class="p">])</span>
-    <span class="n">psd1D_org_std</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">psd1D_total</span><span class="p">[:,</span><span class="n">x</span><span class="p">])</span>
-
-
-<span class="c1">## real data</span>
-<span class="n">psd1D_total2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">number_iter</span><span class="p">,</span> <span class="n">N</span><span class="p">])</span>
-<span class="n">label_total2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">number_iter</span><span class="p">])</span>
-<span class="n">psd1D_org_mean2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-<span class="n">psd1D_org_std2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
-
-
-<span class="n">cont</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">rootdir2</span> <span class="o">=</span> <span class="s1">&#39;prepro_deepFake/real/&#39;</span>
-
-<span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">rootdir2</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>        
-
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-   
-        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-    
-        <span class="c1"># we crop the center</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">w</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">h</span><span class="p">:</span><span class="o">-</span><span class="n">h</span><span class="p">,</span><span class="n">w</span><span class="p">:</span><span class="o">-</span><span class="n">w</span><span class="p">]</span>
-
-        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-        <span class="n">fshift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">fshift</span> <span class="o">+=</span> <span class="n">epsilon</span>
-
-
-        <span class="n">magnitude_spectrum</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fshift</span><span class="p">))</span>
-
-        <span class="c1"># Calculate the azimuthally averaged 1D power spectrum</span>
-        <span class="n">psd1D</span> <span class="o">=</span> <span class="n">radialProfile</span><span class="o">.</span><span class="n">azimuthalAverage</span><span class="p">(</span><span class="n">magnitude_spectrum</span><span class="p">)</span>
-
-        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">psd1D</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="c1"># coordinates of a</span>
-        <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">N</span><span class="p">)</span> <span class="c1"># coordinates for interpolation</span>
-
-        <span class="n">interpolated</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">(</span><span class="n">points</span><span class="p">,</span><span class="n">psd1D</span><span class="p">,</span><span class="n">xi</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
-        <span class="n">interpolated</span> <span class="o">/=</span> <span class="n">interpolated</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="n">psd1D_total2</span><span class="p">[</span><span class="n">cont</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">interpolated</span>             
-        <span class="n">label_total2</span><span class="p">[</span><span class="n">cont</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">cont</span><span class="o">+=</span><span class="mi">1</span>
-
-        <span class="k">if</span> <span class="n">cont</span> <span class="o">==</span> <span class="n">number_iter</span><span class="p">:</span>
-            <span class="k">break</span>
-    <span class="k">if</span> <span class="n">cont</span> <span class="o">==</span> <span class="n">number_iter</span><span class="p">:</span>
-        <span class="k">break</span>
-
-<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-    <span class="n">psd1D_org_mean2</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">psd1D_total2</span><span class="p">[:,</span><span class="n">x</span><span class="p">])</span>
-    <span class="n">psd1D_org_std2</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">psd1D_total2</span><span class="p">[:,</span><span class="n">x</span><span class="p">])</span>
-    
-    
-<span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psd1D_org_mean</span><span class="p">)</span>
-<span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psd1D_org_mean2</span><span class="p">)</span>
-
-<span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psd1D_org_std</span><span class="p">)</span>
-<span class="n">error</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">psd1D_org_std2</span><span class="p">)</span>
-
-<span class="n">psd1D_total_final</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">psd1D_total</span><span class="p">,</span><span class="n">psd1D_total2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">label_total_final</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">label_total</span><span class="p">,</span><span class="n">label_total2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">psd1D_total_final</span>
-<span class="n">data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label_total_final</span>
-
-<span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;train_3200.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
-<span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-<span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DATA Saved&quot;</span><span class="p">)</span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># import cv2</span>
+<span class="c1"># import numpy as np</span>
+<span class="c1"># import os</span>
+<span class="c1"># import radialProfile</span>
+<span class="c1"># import glob</span>
+<span class="c1"># from matplotlib import pyplot as plt</span>
+<span class="c1"># import pickle</span>
+<span class="c1"># from scipy.interpolate import griddata</span>
+<span class="c1"># </span>
+<span class="c1"># data = {}</span>
+<span class="c1"># epsilon = 1e-8</span>
+<span class="c1"># N = 300</span>
+<span class="c1"># y = []</span>
+<span class="c1"># error = []</span>
+<span class="c1"># </span>
+<span class="c1"># number_iter = 1600</span>
+<span class="c1"># </span>
+<span class="c1"># psd1D_total = np.zeros([number_iter, N])</span>
+<span class="c1"># label_total = np.zeros([number_iter])</span>
+<span class="c1"># psd1D_org_mean = np.zeros(N)</span>
+<span class="c1"># psd1D_org_std = np.zeros(N)</span>
+<span class="c1"># </span>
+<span class="c1"># cont = 0</span>
+<span class="c1"># </span>
+<span class="c1"># # fake data</span>
+<span class="c1"># rootdir = &#39;prepro_deepFake/fake/&#39;</span>
+<span class="c1"># </span>
+<span class="c1"># for subdir, dirs, files in os.walk(rootdir):</span>
+<span class="c1">#     for file in files:</span>
+<span class="c1"># </span>
+<span class="c1">#         filename = os.path.join(subdir, file)</span>
+<span class="c1"># </span>
+<span class="c1">#         img = cv2.imread(filename, 0)</span>
+<span class="c1"># </span>
+<span class="c1">#         # we crop the center</span>
+<span class="c1">#         h = int(img.shape[0] / 3)</span>
+<span class="c1">#         w = int(img.shape[1] / 3)</span>
+<span class="c1">#         img = img[h:-h, w:-w]</span>
+<span class="c1"># </span>
+<span class="c1">#         f = np.fft.fft2(img)</span>
+<span class="c1">#         fshift = np.fft.fftshift(f)</span>
+<span class="c1"># </span>
+<span class="c1">#         magnitude_spectrum = 20 * np.log(np.abs(fshift))</span>
+<span class="c1">#         psd1D = radialProfile.azimuthalAverage(magnitude_spectrum)</span>
+<span class="c1"># </span>
+<span class="c1">#         # Calculate the azimuthally averaged 1D power spectrum</span>
+<span class="c1">#         points = np.linspace(0, N, num=psd1D.size)  # coordinates of a</span>
+<span class="c1">#         xi = np.linspace(0, N, num=N)  # coordinates for interpolation</span>
+<span class="c1"># </span>
+<span class="c1">#         interpolated = griddata(points, psd1D, xi, method=&#39;cubic&#39;)</span>
+<span class="c1">#         interpolated /= interpolated[0]</span>
+<span class="c1"># </span>
+<span class="c1">#         psd1D_total[cont, :] = interpolated</span>
+<span class="c1">#         label_total[cont] = 0</span>
+<span class="c1">#         cont += 1</span>
+<span class="c1"># </span>
+<span class="c1">#         if cont == number_iter:</span>
+<span class="c1">#             break</span>
+<span class="c1">#     if cont == number_iter:</span>
+<span class="c1">#         break</span>
+<span class="c1"># </span>
+<span class="c1"># for x in range(N):</span>
+<span class="c1">#     psd1D_org_mean[x] = np.mean(psd1D_total[:, x])</span>
+<span class="c1">#     psd1D_org_std[x] = np.std(psd1D_total[:, x])</span>
+<span class="c1"># </span>
+<span class="c1"># ## real data</span>
+<span class="c1"># psd1D_total2 = np.zeros([number_iter, N])</span>
+<span class="c1"># label_total2 = np.zeros([number_iter])</span>
+<span class="c1"># psd1D_org_mean2 = np.zeros(N)</span>
+<span class="c1"># psd1D_org_std2 = np.zeros(N)</span>
+<span class="c1"># </span>
+<span class="c1"># cont = 0</span>
+<span class="c1"># rootdir2 = &#39;prepro_deepFake/real/&#39;</span>
+<span class="c1"># </span>
+<span class="c1"># for subdir, dirs, files in os.walk(rootdir2):</span>
+<span class="c1">#     for file in files:</span>
+<span class="c1"># </span>
+<span class="c1">#         filename = os.path.join(subdir, file)</span>
+<span class="c1">#         parts = filename.split(&quot;/&quot;)</span>
+<span class="c1"># </span>
+<span class="c1">#         img = cv2.imread(filename, 0)</span>
+<span class="c1"># </span>
+<span class="c1">#         # we crop the center</span>
+<span class="c1">#         h = int(img.shape[0] / 3)</span>
+<span class="c1">#         w = int(img.shape[1] / 3)</span>
+<span class="c1">#         img = img[h:-h, w:-w]</span>
+<span class="c1"># </span>
+<span class="c1">#         f = np.fft.fft2(img)</span>
+<span class="c1">#         fshift = np.fft.fftshift(f)</span>
+<span class="c1">#         fshift += epsilon</span>
+<span class="c1"># </span>
+<span class="c1">#         magnitude_spectrum = 20 * np.log(np.abs(fshift))</span>
+<span class="c1"># </span>
+<span class="c1">#         # Calculate the azimuthally averaged 1D power spectrum</span>
+<span class="c1">#         psd1D = radialProfile.azimuthalAverage(magnitude_spectrum)</span>
+<span class="c1"># </span>
+<span class="c1">#         points = np.linspace(0, N, num=psd1D.size)  # coordinates of a</span>
+<span class="c1">#         xi = np.linspace(0, N, num=N)  # coordinates for interpolation</span>
+<span class="c1"># </span>
+<span class="c1">#         interpolated = griddata(points, psd1D, xi, method=&#39;cubic&#39;)</span>
+<span class="c1">#         interpolated /= interpolated[0]</span>
+<span class="c1"># </span>
+<span class="c1">#         psd1D_total2[cont, :] = interpolated</span>
+<span class="c1">#         label_total2[cont] = 1</span>
+<span class="c1">#         cont += 1</span>
+<span class="c1"># </span>
+<span class="c1">#         if cont == number_iter:</span>
+<span class="c1">#             break</span>
+<span class="c1">#     if cont == number_iter:</span>
+<span class="c1">#         break</span>
+<span class="c1"># </span>
+<span class="c1"># for x in range(N):</span>
+<span class="c1">#     psd1D_org_mean2[x] = np.mean(psd1D_total2[:, x])</span>
+<span class="c1">#     psd1D_org_std2[x] = np.std(psd1D_total2[:, x])</span>
+<span class="c1"># </span>
+<span class="c1"># y.append(psd1D_org_mean)</span>
+<span class="c1"># y.append(psd1D_org_mean2)</span>
+<span class="c1"># </span>
+<span class="c1"># error.append(psd1D_org_std)</span>
+<span class="c1"># error.append(psd1D_org_std2)</span>
+<span class="c1"># </span>
+<span class="c1"># psd1D_total_final = np.concatenate((psd1D_total, psd1D_total2), axis=0)</span>
+<span class="c1"># label_total_final = np.concatenate((label_total, label_total2), axis=0)</span>
+<span class="c1"># </span>
+<span class="c1"># data[&quot;data&quot;] = psd1D_total_final</span>
+<span class="c1"># data[&quot;label&quot;] = label_total_final</span>
+<span class="c1"># </span>
+<span class="c1"># output = open(&#39;train_3200.pkl&#39;, &#39;wb&#39;)</span>
+<span class="c1"># pickle.dump(data, output)</span>
+<span class="c1"># output.close()</span>
+<span class="c1"># </span>
+<span class="c1"># print(&quot;DATA Saved&quot;) </span>
 </pre></div>
 
     </div>
@@ -341,6 +334,45 @@ comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /con
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Plot-of--train_3200.pkl-in-R">Plot of  train_3200.pkl in R<a class="anchor-link" href="#Plot-of--train_3200.pkl-in-R"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">use</span> R
+<span class="o">%</span><span class="k">get</span> y --from Python3
+<span class="c1"># Libraries</span>
+<span class="n">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span>
+
+<span class="c1"># create data</span>
+<span class="n">xvalue</span> <span class="o">&lt;-</span> <span class="mi">1</span><span class="p">:</span><span class="mi">2000</span>
+<span class="n">yvalue</span> <span class="o">&lt;-</span> <span class="n">cumsum</span><span class="p">(</span><span class="n">rnorm</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">data</span> <span class="o">&lt;-</span> <span class="n">data</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">xvalue</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c1">#print(y)</span>
+<span class="c1"># Plot</span>
+<span class="n">ggplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xvalue</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">))</span> <span class="o">+</span> <span class="n">geom_line</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="3.-Check-Spectrum">3. Check Spectrum<a class="anchor-link" href="#3.-Check-Spectrum"> </a></h3>
 </div>
 </div>
@@ -432,12 +464,128 @@ comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /con
 
 
 <div class="output_png output_subarea ">
-<img src="../../images/03/Experiments_DeepFakeDetection/FaceForensic_12_1.png"
+<img src="../../images/03/Experiments_DeepFakeDetection/FaceForensic_14_1.png"
 >
 </div>
 
 </div>
 </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Check-Spectrum-with-Python,-R-and-SOS">Check Spectrum with Python, R and SOS<a class="anchor-link" href="#Check-Spectrum-with-Python,-R-and-SOS"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">num_feat</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">psd1D_org_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num</span><span class="p">,</span><span class="n">num_feat</span><span class="p">))</span>
+<span class="n">psd1D_org_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num</span><span class="p">,</span><span class="n">num_feat</span><span class="p">))</span>
+<span class="n">psd1D_org_0_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_feat</span><span class="p">)</span>
+<span class="n">psd1D_org_0_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_feat</span><span class="p">)</span>
+<span class="n">psd1D_org_1_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_feat</span><span class="p">)</span>
+<span class="n">psd1D_org_1_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_feat</span><span class="p">)</span>
+
+<span class="n">cont_0</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">cont_1</span><span class="o">=</span><span class="mi">0</span>
+
+<span class="c1"># We separate real and fake using the label</span>
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">psd1D_org_0</span><span class="p">[</span><span class="n">cont_0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">x</span><span class="p">,:]</span>
+        <span class="n">cont_0</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">y</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">psd1D_org_1</span><span class="p">[</span><span class="n">cont_1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">x</span><span class="p">,:]</span>
+        <span class="n">cont_1</span><span class="o">+=</span><span class="mi">1</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">use</span> R
+<span class="o">%</span><span class="k">get</span> num_feat --from Python3
+<span class="o">%</span><span class="k">get</span> psd1D_org_0 --from Python3
+<span class="o">%</span><span class="k">get</span> psd1D_org_1 --from Python3
+<span class="o">%</span><span class="k">get</span> psd1D_org_0_mean --from Python3
+<span class="o">%</span><span class="k">get</span> psd1D_org_0_std --from Python3
+<span class="o">%</span><span class="k">get</span> psd1D_org_1_mean --from Python3
+<span class="o">%</span><span class="k">get</span> psd1D_org_1_std --from Python3
+
+<span class="k">for</span> <span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">num_feat</span><span class="p">)){</span>
+    <span class="n">psd1D_org_0_mean</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">psd1D_org_0</span><span class="p">[(</span><span class="mi">0</span><span class="p">:</span><span class="mi">1000</span><span class="p">),</span><span class="n">x</span><span class="p">])</span>
+    <span class="n">psd1D_org_0_std</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd</span><span class="p">(</span><span class="n">psd1D_org_0</span><span class="p">[(</span><span class="mi">0</span><span class="p">:</span><span class="mi">1000</span><span class="p">),</span><span class="n">x</span><span class="p">])</span>
+    <span class="n">psd1D_org_1_mean</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">psd1D_org_1</span><span class="p">[(</span><span class="mi">0</span><span class="p">:</span><span class="mi">1000</span><span class="p">),</span><span class="n">x</span><span class="p">])</span>
+    <span class="n">psd1D_org_1_std</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd</span><span class="p">(</span><span class="n">psd1D_org_1</span><span class="p">[(</span><span class="mi">0</span><span class="p">:</span><span class="mi">1000</span><span class="p">),</span><span class="n">x</span><span class="p">])</span>
+<span class="p">}</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">get</span> num_feat --from R
+<span class="o">%</span><span class="k">get</span> psd1D_org_0 --from R
+<span class="o">%</span><span class="k">get</span> psd1D_org_1 --from R
+<span class="o">%</span><span class="k">get</span> psd1D_org_0_mean --from R
+<span class="o">%</span><span class="k">get</span> psd1D_org_0_std --from R
+<span class="o">%</span><span class="k">get</span> psd1D_org_1_mean --from R
+<span class="o">%</span><span class="k">get</span> psd1D_org_1_std --from R
+
+<span class="c1"># Plot</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_feat</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psd1D_org_0_mean</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Fake&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psd1D_org_0_mean</span> <span class="o">-</span> <span class="n">psd1D_org_0_std</span><span class="p">,</span> <span class="n">psd1D_org_0_mean</span> <span class="o">+</span> <span class="n">psd1D_org_0_std</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psd1D_org_1_mean</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Real&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">psd1D_org_1_mean</span> <span class="o">-</span> <span class="n">psd1D_org_1_std</span><span class="p">,</span> <span class="n">psd1D_org_1_mean</span> <span class="o">+</span> <span class="n">psd1D_org_1_std</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Spatial Frequency&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Power Spectrum&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="c1">#plt.savefig(&#39;1000_celeba.png&#39;, bbox_inches=&#39;tight&#39;)</span>
+</pre></div>
+
+    </div>
 </div>
 </div>
 
