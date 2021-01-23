@@ -25,7 +25,7 @@ amateur users the modification of contents at their will.
 
 
 <p align='center'>  
-    <img align="center" src="03/imgs/pipeline.PNG" width="500"/>
+    <img align="center" src="03/imgs/pipeline.png" width="500"/>
 </p>
 
 
