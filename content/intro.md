@@ -1,4 +1,3 @@
-# Introduction
 
 ## Unmasking DeepFakes with simple Features
 Ricard Durall<sup>1,2,3</sup> Margret Keuper<sup>4</sup> Franz-Josef Pfreundt<sup>1</sup>
