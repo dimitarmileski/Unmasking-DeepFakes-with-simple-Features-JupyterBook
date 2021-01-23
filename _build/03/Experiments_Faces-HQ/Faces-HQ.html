@@ -1,0 +1,738 @@
+---
+redirect_from:
+  - "/03/experiments-faces-hq/faces-hq"
+interact_link: content/03/Experiments_Faces-HQ/Faces-HQ.ipynb
+kernel_name: sos
+kernel_path: content/03/Experiments_Faces-HQ
+has_widgets: false
+title: |-
+  Detection Faces-HQ
+pagenum: 4
+prev_page:
+  url: /03/Test_Accuracy/accuracy.html
+next_page:
+  url: /03/Experiments_CelebA/CelebA.html
+suffix: .ipynb
+search: features create spectrum faces hq notebook pre computed ones sure plot r check show results scratch feature want download data link cutt ly endlyg save folder together otherwise just jump section loading load either created label distribution balanced dataset datasetfreq pkl calculation python sos classification classify using
+
+comment: "***PROGRAMMATICALLY GENERATED, DO NOT EDIT. SEE ORIGINAL FILES IN /content***"
+---
+
+    <main class="jupyter-page">
+    <div id="page-info"><div id="page-title">Detection Faces-HQ</div>
+</div>
+    <div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Faces-HQ">Faces-HQ<a class="anchor-link" href="#Faces-HQ"> </a></h1>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In this notebook we show the results for Faces-HQ. You can create from scratch the features or use the pre-computed ones.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="1.-Create-feature">1. Create feature<a class="anchor-link" href="#1.-Create-feature"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If you want to create the features, first of all download the data from <a href="https://cutt.ly/6enDLYG">link</a>. Be sure to save the folder together with this notebook.</p>
+<h3 id="Otherwise,-just-jump-to-section-2.">Otherwise, just jump to section 2.<a class="anchor-link" href="#Otherwise,-just-jump-to-section-2."> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span># import cv2
+# import numpy as np
+# import os
+# import radialProfile
+# import glob
+# from matplotlib import pyplot as plt
+# import pickle
+# 
+# path = [&#39;thispersondoesntexists&#39;, &#39;100KFake&#39;, &#39;Flickr-Faces-HQ2_&#39;, &#39;celebA-HQ_10K&#39;]
+# labels = [1, 1, 0, 0]
+# format_file = [&#39;jpg&#39;, &#39;jpg&#39;, &#39;jpg&#39;, &#39;jpg&#39;]
+# epsilon = 1e-8
+# data = {}
+# # number of samples from each dataset
+# stop = 250
+# number_iter = 4 * stop
+# psd1D_total = np.zeros([number_iter, 722])
+# label_total = np.zeros([number_iter])
+# iter_ = 0
+# 
+# for z in range(4):
+#     cont = 0
+#     psd1D_average_org = np.zeros(722)
+#     print(path[z])
+# 
+#     for filename in glob.glob(path[z] + &quot;/*.&quot; + format_file[z]):
+#         img = cv2.imread(filename, 0)
+#         f = np.fft.fft2(img)
+#         fshift = np.fft.fftshift(f)
+#         fshift += epsilon
+# 
+#         magnitude_spectrum = 20 * np.log(np.abs(fshift))
+# 
+#         # Calculate the azimuthally averaged 1D power spectrum
+#         psd1D = radialProfile.azimuthalAverage(magnitude_spectrum)
+#         psd1D_total[iter_, :] = psd1D
+#         label_total[iter_] = labels[z]
+# 
+#         cont += 1
+#         iter_ += 1
+#         if cont &gt;= stop:
+#             break
+# 
+# data[&quot;data&quot;] = psd1D_total
+# data[&quot;label&quot;] = label_total
+# 
+# output = open(&#39;dataset_freq_1000.pkl&#39;, &#39;wb&#39;)
+# pickle.dump(data, output)
+# output.close()
+# print(&quot;DATA Saved&quot;)    
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>thispersondoesntexists
+100KFake
+Flickr-Faces-HQ2_
+celebA-HQ_10K
+DATA Saved
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="2.-Loading-Features">2. Loading Features<a class="anchor-link" href="#2.-Loading-Features"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, we load the features. Either the pre-computed ones or the features that you have created.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>import numpy as np
+import matplotlib.pyplot as plt
+import pickle
+
+# load feature file
+pkl_file = open(&#39;dataset_freq_1000.pkl&#39;, &#39;rb&#39;)
+data = pickle.load(pkl_file)
+pkl_file.close()
+X = data[&quot;data&quot;]
+y = data[&quot;label&quot;]
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We look at the label distribution, to be sure that we have a balanced dataset.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>plt.plot(y)
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&lt;matplotlib.lines.Line2D at 0x7f88055b2fa0&gt;]</pre>
+</div>
+
+</div>
+</div>
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="../../images/03/Experiments_Faces-HQ/Faces-HQ_9_1.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Plot-of--dataset_freq_1000.pkl-in-R">Plot of  dataset_freq_1000.pkl in R<a class="anchor-link" href="#Plot-of--dataset_freq_1000.pkl-in-R"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>%use R
+%get y --from Python3
+# Libraries
+library(ggplot2)
+
+# create data
+xvalue &lt;- 1:1000
+yvalue &lt;- cumsum(rnorm(10))
+data &lt;- data.frame(xvalue,y)
+
+#print(y)
+# Plot
+ggplot(data, aes(x=xvalue, y=y)) + geom_line()
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="../../images/03/Experiments_Faces-HQ/Faces-HQ_11_0.png"
+width=420
+height=420
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="3.-Check-Spectrum">3. Check Spectrum<a class="anchor-link" href="#3.-Check-Spectrum"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We have a look to the spectrum</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>num = int(X.shape[0]/2)
+num_feat = X.shape[1]
+
+psd1D_org_0 = np.zeros((num,num_feat))
+psd1D_org_1 = np.zeros((num,num_feat))
+psd1D_org_0_mean = np.zeros(num_feat)
+psd1D_org_0_std = np.zeros(num_feat)
+psd1D_org_1_mean = np.zeros(num_feat)
+psd1D_org_1_std = np.zeros(num_feat)
+
+cont_0=0
+cont_1=0
+
+# We separate real and fake using the label
+for x in range(X.shape[0]):
+    if y[x]==0:
+        psd1D_org_0[cont_0,:] = X[x,:]
+        cont_0+=1
+    elif y[x]==1:
+        psd1D_org_1[cont_1,:] = X[x,:]
+        cont_1+=1
+
+# We compute statistcis
+for x in range(num_feat):
+    psd1D_org_0_mean[x] = np.mean(psd1D_org_0[:,x])
+    psd1D_org_0_std[x]= np.std(psd1D_org_0[:,x])
+    psd1D_org_1_mean[x] = np.mean(psd1D_org_1[:,x])
+    psd1D_org_1_std[x]= np.std(psd1D_org_1[:,x])
+    
+# Plot
+x = np.arange(0, num_feat, 1)
+fig, ax = plt.subplots(figsize=(15, 9))
+ax.plot(x, psd1D_org_0_mean, alpha=0.5, color=&#39;red&#39;, label=&#39;Real&#39;, linewidth =2.0)
+ax.fill_between(x, psd1D_org_0_mean - psd1D_org_0_std, psd1D_org_0_mean + psd1D_org_0_std, color=&#39;red&#39;, alpha=0.2)
+ax.plot(x, psd1D_org_1_mean, alpha=0.5, color=&#39;blue&#39;, label=&#39;Fake&#39;, linewidth =2.0)
+ax.fill_between(x, psd1D_org_1_mean - psd1D_org_1_std, psd1D_org_1_mean + psd1D_org_1_std, color=&#39;blue&#39;, alpha=0.2)
+ax.legend()
+plt.tick_params(axis=&#39;x&#39;, labelsize=20)
+plt.tick_params(axis=&#39;y&#39;, labelsize=20)
+ax.legend(loc=&#39;best&#39;, prop={&#39;size&#39;: 20})
+plt.xlabel(&quot;Spatial Frequency&quot;, fontsize=20)
+plt.ylabel(&quot;Power Spectrum&quot;, fontsize=20)
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Text(0, 0.5, &#39;Power Spectrum&#39;)</pre>
+</div>
+
+</div>
+</div>
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="../../images/03/Experiments_Faces-HQ/Faces-HQ_14_1.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Check-Spectrum-Calculation-in--R,-plot-in-Python---SOS">Check Spectrum Calculation in  R, plot in Python - SOS<a class="anchor-link" href="#Check-Spectrum-Calculation-in--R,-plot-in-Python---SOS"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>num = int(X.shape[0]/2)
+num_feat = X.shape[1]
+
+psd1D_org_0 = np.zeros((num,num_feat))
+psd1D_org_1 = np.zeros((num,num_feat))
+psd1D_org_0_mean = np.zeros(num_feat)
+psd1D_org_0_std = np.zeros(num_feat)
+psd1D_org_1_mean = np.zeros(num_feat)
+psd1D_org_1_std = np.zeros(num_feat)
+
+cont_0=0
+cont_1=0
+
+# We separate real and fake using the label
+for x in range(X.shape[0]):
+    if y[x]==0:
+        psd1D_org_0[cont_0,:] = X[x,:]
+        cont_0+=1
+    elif y[x]==1:
+        psd1D_org_1[cont_1,:] = X[x,:]
+        cont_1+=1
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>psd1D_org_0.shape
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(500, 722)</pre>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>%use R
+%get num_feat --from Python3
+%get psd1D_org_0 --from Python3
+%get psd1D_org_1 --from Python3
+%get psd1D_org_0_mean --from Python3
+%get psd1D_org_0_std --from Python3
+%get psd1D_org_1_mean --from Python3
+%get psd1D_org_1_std --from Python3
+
+for (x in (0:num_feat)){
+    psd1D_org_0_mean[x] = mean(psd1D_org_0[(0:500),x])
+    psd1D_org_0_std[x] = sd(psd1D_org_0[(0:500),x])
+    psd1D_org_1_mean[x] = mean(psd1D_org_1[(0:500),x])
+    psd1D_org_1_std[x] = sd(psd1D_org_1[(0:500),x])
+}
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>%get num_feat --from R
+%get psd1D_org_0 --from R
+%get psd1D_org_1 --from R
+%get psd1D_org_0_mean --from R
+%get psd1D_org_0_std --from R
+%get psd1D_org_1_mean --from R
+%get psd1D_org_1_std --from R
+
+# Plot
+x = np.arange(0, num_feat, 1)
+fig, ax = plt.subplots(figsize=(15, 9))
+ax.plot(x, psd1D_org_0_mean, alpha=0.5, color=&#39;red&#39;, label=&#39;Real&#39;, linewidth =2.0)
+ax.fill_between(x, psd1D_org_0_mean - psd1D_org_0_std, psd1D_org_0_mean + psd1D_org_0_std, color=&#39;red&#39;, alpha=0.2)
+ax.plot(x, psd1D_org_1_mean, alpha=0.5, color=&#39;blue&#39;, label=&#39;Fake&#39;, linewidth =2.0)
+ax.fill_between(x, psd1D_org_1_mean - psd1D_org_1_std, psd1D_org_1_mean + psd1D_org_1_std, color=&#39;blue&#39;, alpha=0.2)
+ax.legend()
+plt.tick_params(axis=&#39;x&#39;, labelsize=20)
+plt.tick_params(axis=&#39;y&#39;, labelsize=20)
+ax.legend(loc=&#39;best&#39;, prop={&#39;size&#39;: 20})
+plt.xlabel(&quot;Spatial Frequency&quot;, fontsize=20)
+plt.ylabel(&quot;Power Spectrum&quot;, fontsize=20)
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Text(0, 0.5, &#39;Power Spectrum&#39;)</pre>
+</div>
+
+</div>
+</div>
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+
+
+<div class="output_png output_subarea ">
+<img src="../../images/03/Experiments_Faces-HQ/Faces-HQ_19_1.png"
+>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="4.-Classification">4. Classification<a class="anchor-link" href="#4.-Classification"> </a></h3>
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we classify using the features.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="jb_cell">
+
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-sos"><pre><span></span>import numpy as np
+import matplotlib.pyplot as plt
+import pickle
+
+num = 10
+LR = 0
+SVM = 0
+
+
+for z in range(num):
+    # read python dict back from the file
+    pkl_file = open(&#39;dataset_freq_1000.pkl&#39;, &#39;rb&#39;)
+    
+    data = pickle.load(pkl_file)
+
+    pkl_file.close()
+    X = data[&quot;data&quot;]
+    y = data[&quot;label&quot;]
+
+    try:
+
+        from sklearn.model_selection import train_test_split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
+
+        from sklearn.svm import SVC
+        svclassifier = SVC(kernel=&#39;linear&#39;)
+        svclassifier.fit(X_train, y_train)
+        #print(&#39;Accuracy on test set: {:.3f}&#39;.format(svclassifier.score(X_test, y_test)))
+        
+        from sklearn.linear_model import LogisticRegression
+        logreg = LogisticRegression(solver=&#39;liblinear&#39;, max_iter=1000)
+        logreg.fit(X_train, y_train)
+        #print(&#39;Accuracy on test set: {:.3f}&#39;.format(logreg.score(X_test, y_test)))
+
+        
+        SVM+=svclassifier.score(X_test, y_test)
+        LR+=logreg.score(X_test, y_test)
+
+ 
+    except:
+        num-=1
+        print(num)
+    
+print(&quot;Average SVM: &quot;+str(SVM/num))
+print(&quot;Average LR: &quot;+str(LR/num))
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+</pre>
+</div>
+</div>
+</div>
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Average SVM: 1.0
+Average LR: 1.0
+</pre>
+</div>
+</div>
+</div>
+<div class="jb_output_wrapper }}">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/opt/anaconda3/lib/python3.6/site-packages/sklearn/svm/base.py:193: FutureWarning: The default value of gamma will change from &#39;auto&#39; to &#39;scale&#39; in version 0.22 to account better for unscaled features. Set gamma explicitly to &#39;auto&#39; or &#39;scale&#39; to avoid this warning.
+  &#34;avoid this warning.&#34;, FutureWarning)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+ 
+
+
+    </main>
+    
